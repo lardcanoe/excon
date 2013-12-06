@@ -29,11 +29,19 @@ module Excon
       end
 
       def get_cert(filename)
-        @cached_certs[filename] ||= OpenSSL::X509::Certificate.new(File.read(filename))
+        if @cached_certs[filename].nil? or @cached_certs[filename]['mtime'] != File.mtime(filename)
+          @cached_certs[filename]['mtime'] = File.mtime(filename)
+          @cached_certs[filename]['cert'] = OpenSSL::X509::Certificate.new(File.read(filename))
+        end
+        @cached_certs[filename]['cert']
       end
 
       def get_key(filename)
-        @cached_keys[filename] ||= OpenSSL::PKey::RSA.new(File.read(filename))
+        if @cached_keys[filename].nil? or @cached_keys[filename]['mtime'] != File.mtime(filename)
+          @cached_keys[filename]['mtime'] = File.mtime(filename)
+          @cached_keys[filename]['key'] = OpenSSL::PKey::RSA.new(File.read(filename))
+        end
+        @cached_keys[filename]['key']
       end
     end
 
